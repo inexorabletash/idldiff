@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <title>Web IDL Comparer</title>
+
 <link rel="stylesheet" href="CodeMirror/lib/codemirror.css">
 <link rel="stylesheet" href="CodeMirror/theme/elegant.css">
 <style>
@@ -29,8 +30,8 @@
   position: absolute; overflow: hidden;
   bottom: 0; left: 0; right: 0; height: 25%;
 }
-
 </style>
+
 <script src="webidl2.js/lib/webidl2.js"></script>
 <script src="CodeMirror/lib/codemirror.js"></script>
 <script src="CodeMirror/addon/selection/active-line.js"></script>
@@ -38,7 +39,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var $ = function(s) { return document.querySelector(s); };
-  var $$ = function(s) { return document.querySelectorAll(s); };
+
+  var searchParams = (function() {
+    var o = {};
+    if (location.search.length > 1) {
+      location.search.substring(1).split(/&/g).forEach(function(p) {
+        p = p.split('=');
+        o[decodeURIComponent(p[0])] = p.length ? decodeURIComponent(p[1]) : '';
+      });
+    }
+    return o;
+  }());
 
   var options = {
     lineNumbers: true,
@@ -46,37 +57,34 @@ document.addEventListener('DOMContentLoaded', function() {
     mode: 'webidl',
     theme: 'elegant'
   };
-  var lhs_editor = CodeMirror.fromTextArea($('#lhs'), options);
-  var rhs_editor = CodeMirror.fromTextArea($('#rhs'), options);
+  var lhs = CodeMirror.fromTextArea($('#lhs'), options);
+  var rhs = CodeMirror.fromTextArea($('#rhs'), options);
 
-  lhs_editor.on('change', onchange);
-  rhs_editor.on('change', onchange);
+  lhs.on('change', onchange);
+  rhs.on('change', onchange);
 
   function onchange() {
-    var lhs = lhs_editor.getValue();
-    var rhs = rhs_editor.getValue();
-
     function formatWebIDLError(ex) {
       return '(line: ' + ex.line + ') ' + ex.message + ': ' + ex.input;
     }
+
     try {
-      var lhs_parsed = WebIDL2.parse(lhs);
+      var lhs_parsed = WebIDL2.parse(lhs.getValue());
     } catch (ex) {
-      out.value = "Left: " + formatWebIDLError(ex);
-      lhs_editor.setCursor(ex.line - 1);
+      out.value = 'Left: ' + formatWebIDLError(ex);
+      lhs.setCursor(ex.line - 1);
       return;
     }
 
     try {
-      var rhs_parsed = WebIDL2.parse(rhs);
+      var rhs_parsed = WebIDL2.parse(rhs.getValue());
     } catch (ex) {
-      out.value = "Right: " + formatWebIDLError(ex);
-      rhs_editor.setCursor(ex.line - 1);
+      out.value = 'Right: ' + formatWebIDLError(ex);
+      rhs.setCursor(ex.line - 1);
       return;
     }
 
-    // TODO: Option to consider order.
-    if (true) {
+    if (!searchParams['order']) {
       sort_interface_members(lhs_parsed);
       sort_interface_members(rhs_parsed);
     }
@@ -100,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function compare(lhs, rhs) {
     if (typeof lhs !== typeof rhs)
       return 'types differ: ' + typeof lhs + ' vs. ' + typeof rhs;
+
     switch (typeof lhs) {
       case 'undefined':
       case 'boolean':
@@ -115,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var results = [], r, i, k;
         if (Array.isArray(lhs) && Array.isArray(rhs)) {
-          // TODO: Compare what's there
+          // TODO: Compare entries
           if (lhs.length !== rhs.length)
             return 'lengths differ: ' + lhs.length + ' vs. ' + rhs.length;
 
@@ -127,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           var keys_lhs = Object.keys(lhs), keys_rhs = Object.keys(rhs);
           r = compare(keys_lhs, keys_rhs);
-          // TODO: Compare what's there
-          if (r) return 'keys differ:  ' + keys_lhs + ' vs. ' + keys_rhs;
+          // TODO: Compare entries
+          if (r) return 'keys differ: ' + keys_lhs + ' vs. ' + keys_rhs;
 
           for (i = 0; i < keys_lhs.length; ++i) {
             k = keys_lhs[i];
