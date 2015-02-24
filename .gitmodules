@@ -1,0 +1,6 @@
+[submodule "CodeMirror"]
+	path = CodeMirror
+	url = https://github.com/codemirror/CodeMirror.git
+[submodule "webidl2.js"]
+	path = webidl2.js
+	url = https://github.com/darobin/webidl2.js.git
