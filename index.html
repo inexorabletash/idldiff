@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<title>Web IDL Comparer</title>
+<link rel="stylesheet" href="CodeMirror/lib/codemirror.css">
+<link rel="stylesheet" href="CodeMirror/theme/elegant.css">
+<style>
+.CodeMirror {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #444;
+}
+
+.cm-operator { color: #008; font-weight: bold; }
+
+.cm-extendedAttribute,
+.cm-extendedAttributeOperator { color: #999; font-weight: bold; }
+.cm-extendedAttributeIdentifier { color: #555; }
+
+#out { width: 100%; height: 100%; }
+
+#lhs-box {
+  position: absolute; overflow: hidden;
+  top: 0; left: 0; width: 50%; height: 75%;
+  }
+#rhs-box {
+  position: absolute; overflow: hidden;
+  top: 0; right: 0; width: 50%; height: 75%;
+}
+#out-box {
+  position: absolute; overflow: hidden;
+  bottom: 0; left: 0; right: 0; height: 25%;
+}
+
+</style>
+<script src="webidl2.js/lib/webidl2.js"></script>
+<script src="CodeMirror/lib/codemirror.js"></script>
+<script src="CodeMirror/addon/selection/active-line.js"></script>
+<script src="cm/webidl.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var $ = function(s) { return document.querySelector(s); };
+  var $$ = function(s) { return document.querySelectorAll(s); };
+
+  var options = {
+    lineNumbers: true,
+    styleActiveLine: true,
+    mode: 'webidl',
+    theme: 'elegant'
+  };
+  var lhs_editor = CodeMirror.fromTextArea($('#lhs'), options);
+  var rhs_editor = CodeMirror.fromTextArea($('#rhs'), options);
+
+  lhs_editor.on('change', onchange);
+  rhs_editor.on('change', onchange);
+
+  function onchange() {
+    var lhs = lhs_editor.getValue();
+    var rhs = rhs_editor.getValue();
+
+    function formatWebIDLError(ex) {
+      return '(line: ' + ex.line + ') ' + ex.message + ': ' + ex.input;
+    }
+    try {
+      var lhs_parsed = WebIDL2.parse(lhs);
+    } catch (ex) {
+      out.value = "Left: " + formatWebIDLError(ex);
+      lhs_editor.setCursor(ex.line - 1);
+      return;
+    }
+
+    try {
+      var rhs_parsed = WebIDL2.parse(rhs);
+    } catch (ex) {
+      out.value = "Right: " + formatWebIDLError(ex);
+      rhs_editor.setCursor(ex.line - 1);
+      return;
+    }
+
+    // TODO: Option to consider order.
+    if (true) {
+      sort_interface_members(lhs_parsed);
+      sort_interface_members(rhs_parsed);
+    }
+
+    var r = compare(lhs_parsed, rhs_parsed);
+    $('#out').value = r ? r : '(no differences)';
+  }
+
+  function sort_interface_members(tree) {
+    tree.forEach(function(member) {
+      if (member.type === 'interface') {
+        member.members.sort(function(a, b) {
+          a = a.name;
+          b = b.name;
+          return a < b ? -1 : a > b ? 1 : 0;
+        });
+      }
+    });
+  }
+
+  function compare(lhs, rhs) {
+    if (typeof lhs !== typeof rhs)
+      return 'types differ: ' + typeof lhs + ' vs. ' + typeof rhs;
+    switch (typeof lhs) {
+      case 'undefined':
+      case 'boolean':
+      case 'number':
+      case 'string':
+        return !Object.is(lhs, rhs) ? 'values differ: ' + lhs + ' vs. ' + rhs : undefined;
+      case 'object':
+      default:
+        if (!lhs || !rhs) {
+          if (lhs === rhs) return;
+          return (lhs ? 'non-null' : 'null') + ' vs. ' + (rhs ? 'non-null' : 'null')
+        }
+
+        var results = [], r, i, k;
+        if (Array.isArray(lhs) && Array.isArray(rhs)) {
+          // TODO: Compare what's there
+          if (lhs.length !== rhs.length)
+            return 'lengths differ: ' + lhs.length + ' vs. ' + rhs.length;
+
+          for (i = 0; i < lhs.length; ++i) {
+            r = compare(lhs[i], rhs[i]);
+            if (r) results.push('at index [' + i + ']: ' + r);
+          }
+          return results.length ? results.join('\n') : undefined;
+        } else {
+          var keys_lhs = Object.keys(lhs), keys_rhs = Object.keys(rhs);
+          r = compare(keys_lhs, keys_rhs);
+          // TODO: Compare what's there
+          if (r) return 'keys differ:  ' + keys_lhs + ' vs. ' + keys_rhs;
+
+          for (i = 0; i < keys_lhs.length; ++i) {
+            k = keys_lhs[i];
+            r = compare(lhs[k], rhs[k]);
+            if (r) results.push('at key [' + k + ']: ' + r);
+          }
+        }
+        return results.length ? results.join('\n') : undefined;
+    }
+  }
+});
+</script>
+
+<div id="lhs-box"><textarea id=lhs></textarea></div>
+<div id="rhs-box"><textarea id=rhs></textarea></div>
+<div id="out-box"><textarea id=out readonly></textarea></div>
