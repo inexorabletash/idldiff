@@ -11,14 +11,14 @@ https://inexorabletash.github.io/idldiff/
   syntax highlighting of WebIDL files
 * Type or paste WebIDL in the left and right panels
 * The WebIDL will be validated using [webidl2.js](https://github.com/darobin/webidl2.js/)
-  * The first error encountered will be shown at the bottom, with the offending line highlighted
+* The first error encountered will be shown at the bottom, with the offending line highlighted
 * If both left and right WebIDL is valid, the parsed results (AST structures) will be compared
-  and some differences reported. The diff mechanism is really dumb - basically just a recursive
-  JS comparison function.
+  and the first set of differences reported. 
   
 Caveats:
 
-* The diff report is extremely dumb. 
+* The diff report is extremely dumb. Basically just a recursive JS comparison function, with
+  some attempt to provide context.
 * By default, member order for interfaces is ignored. This is to facilitate testing that
   reordering/commenting existing WebIDL files has not changed anything. To override this,
   load the page with `?order` as a query parameter.
@@ -38,3 +38,7 @@ Or:
   git submodule update --init --recursive
 
 Then just fire up a web server in the directory and load `index.html`
+
+## Roadmap
+
+* Ideally, the parsed ASTs would be reserialized to WebIDL and compared using a proper diff algorithm.
