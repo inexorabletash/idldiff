@@ -78,23 +78,29 @@ document.addEventListener('DOMContentLoaded', function() {
       return '(line: ' + ex.line + ') ' + ex.message + ': ' + ex.input;
     }
 
+    var valid = true;
+    out.value = '';
+
     try {
       var lhs_parsed = WebIDL2.parse(lhs.getValue());
     } catch (ex) {
-      out.value = 'Left: ' + formatWebIDLError(ex);
+      valid = false;
+      out.value += 'Left: ' + formatWebIDLError(ex) + '\n';
       marker = lhs.markText({line: ex.line - 1, ch: 0}, {line: ex.line - 1},
                             {className: 'idl-error'});
-      return;
     }
 
     try {
       var rhs_parsed = WebIDL2.parse(rhs.getValue());
     } catch (ex) {
-      out.value = 'Right: ' + formatWebIDLError(ex);
+      valid = false;
+      out.value += 'Right: ' + formatWebIDLError(ex) + '\n';
       marker = rhs.markText({line: ex.line - 1, ch: 0}, {line: ex.line - 1},
                             {className: 'idl-error'});
-      return;
     }
+
+    if (!valid)
+      return;
 
     if (!searchParams['order']) {
       sort_interface_members(lhs_parsed);
