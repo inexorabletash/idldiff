@@ -1,9 +1,7 @@
 # idldiff
 Extremely basic visual [WebIDL](heycam.github.io/webidl/) comparison tool
 
-Use it live at:
-
-https://inexorabletash.github.io/idldiff/
+Use it live at: https://inexorabletash.github.io/idldiff/
 
 ## Instructions
 
@@ -29,13 +27,13 @@ Caveats:
 
 To hack on it or host it locally, clone including submodules:
 
-  git clone --recursive git://github.com/inexorabletash/idldiff.git
+    git clone --recursive git://github.com/inexorabletash/idldiff.git
   
 Or:
 
-  git clone git://github.com/inexorabletash/idldiff.git
-  cd idldiff
-  git submodule update --init --recursive
+    git clone git://github.com/inexorabletash/idldiff.git
+    cd idldiff
+    git submodule update --init --recursive
 
 Then just fire up a web server in the directory and load `index.html`
 
