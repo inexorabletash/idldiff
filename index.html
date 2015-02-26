@@ -85,8 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       var lhs_parsed = WebIDL2.parse(lhs.getValue());
     } catch (ex) {
-console.log(ex);
-console.log(ex.stack);
       valid = false;
       line = ex.line > 0 ? ex.line - 1 : 0;
       out.value += 'Left: ' + formatWebIDLError(ex) + '\n';
