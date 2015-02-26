@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   var lhs = CodeMirror.fromTextArea($('#lhs'), options);
   var rhs = CodeMirror.fromTextArea($('#rhs'), options);
+  var out = $('#out');
 
   lhs.on('change', onchange);
   rhs.on('change', onchange);
@@ -109,7 +110,7 @@ console.log(ex);
     }
 
     var r = compare(lhs_parsed, rhs_parsed);
-    $('#out').value = r ? r : '(no differences)';
+    out.value = r ? r : '(no differences)';
   }
 
   function sort_interface_members(tree) {
