@@ -10,7 +10,7 @@ Use it live at: https://inexorabletash.github.io/idldiff/
 * Type or paste WebIDL in the left and right panels
 * The WebIDL will be validated using [webidl2.js](https://github.com/darobin/webidl2.js/)
 * The first error encountered will be shown at the bottom, with the offending line highlighted
-* If both left and right WebIDL is valid, the parsed results (AST structures) will be compared
+* If both left and right WebIDL are valid, the parsed results (AST structures) will be compared
   and the first set of differences reported. 
   
 Caveats:
