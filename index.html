@@ -78,25 +78,25 @@ document.addEventListener('DOMContentLoaded', function() {
       return '(line: ' + ex.line + ') ' + ex.message + ': ' + ex.input;
     }
 
-    var valid = true;
+    var valid = true, line;
     out.value = '';
 
     try {
       var lhs_parsed = WebIDL2.parse(lhs.getValue());
     } catch (ex) {
       valid = false;
+      line = ex.line > 0 ? ex.line - 1 : 0;
       out.value += 'Left: ' + formatWebIDLError(ex) + '\n';
-      marker = lhs.markText({line: ex.line - 1, ch: 0}, {line: ex.line - 1},
-                            {className: 'idl-error'});
+      marker = lhs.markText({line: line, ch: 0}, {line: line}, {className: 'idl-error'});
     }
 
     try {
       var rhs_parsed = WebIDL2.parse(rhs.getValue());
     } catch (ex) {
       valid = false;
+      line = ex.line > 0 ? ex.line - 1 : 0;
       out.value += 'Right: ' + formatWebIDLError(ex) + '\n';
-      marker = rhs.markText({line: ex.line - 1, ch: 0}, {line: ex.line - 1},
-                            {className: 'idl-error'});
+      marker = rhs.markText({line: line, ch: 0}, {line: line}, {className: 'idl-error'});
     }
 
     if (!valid)
